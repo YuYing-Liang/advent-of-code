@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <optional>
+#include <fstream>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -48,6 +49,10 @@ optional<vector<string>> search_folders(const fs::path &root)
           size_t last_slash_pos = folder_path.rfind("/");
           size_t length = folder_path.size();
           string folder_name = folder_path.substr(last_slash_pos + 1, length - last_slash_pos);
+          if (folder_name[0] == '.')
+          {
+            continue;
+          }
           folder_names.push_back(folder_name);
         }
       }
@@ -98,7 +103,7 @@ int main()
   {
     fs::path current_path = get_executable_path();
     auto root_folder_result = getFolderNames(current_path);
-    if (root_folder_result.has_value())
+    if (!root_folder_result.has_value())
     {
       cout << "No folders in root" << endl;
       return 0;
@@ -125,18 +130,23 @@ int main()
 
     string chosen_day;
     cin >> chosen_day;
-    auto year_folder_result = getFolderNames(current_path.append("/" + chosen_year));
-    if (year_folder_result.has_value())
+    chosen_day = "day" + chosen_day;
+
+    fs::path day_folder_path(current_path.string());
+    day_folder_path /= chosen_year;
+
+    auto year_folder_result = getFolderNames(day_folder_path);
+    if (!year_folder_result.has_value())
     {
       cout << "No folders in year " + chosen_year + " year" << endl;
       return 0;
     }
     auto year_folder_value = year_folder_result.value();
     vector<string> day_folders = year_folder_value.first;
-    auto day_folder_index = find(day_folders.begin(), day_folders.end(), chosen_year);
+    auto day_folder_index = find(day_folders.begin(), day_folders.end(), chosen_day);
     if (day_folder_index == day_folders.end())
     {
-      cout << "Chosen year does not exist in the current codebase." << endl;
+      cout << "Chosen day does not exist in the current codebase." << endl;
       return 0;
     }
 
@@ -150,11 +160,43 @@ int main()
       return 0;
     }
 
+    string file_path = chosen_year + "/" + chosen_day + "/" + "part" + to_string(chosen_part);
+
+    cout << "Would you like to use the input file or manually enter data? (m/f):" << endl;
+    char input_choice;
+    cin >> input_choice;
+
+    string challenge_input;
+    if (input_choice == 'f')
+    {
+      ifstream file(current_path.string() + "/" + file_path + ".txt");
+      if (file.is_open())
+      {
+        getline(file, challenge_input);
+        file.close();
+      }
+      else
+      {
+        cout << "Unable to open file" << endl;
+        return 1;
+      }
+    }
+    else if (input_choice == 'm')
+    {
+      cout << "Enter the input for this challenge: ";
+      cin >> challenge_input;
+    }
+    else
+    {
+      cout << "Invalid choice" << endl;
+      return 1;
+    }
+
     cout << "Great! Compiling code ..." << endl;
 
-    string file_name = "part" + to_string(chosen_part);
-    string file_path = chosen_year + "/day" + chosen_day + "/" + file_name;
-    string command = "g++ -std=c++17 -o " + file_name + ".out " + file_path + ".cpp";
+    string command = "g++ -std=c++17 -o " + file_path + ".out " + file_path + ".cpp";
+
+    cout << "Running: " + command << endl;
 
     int compilation_result = system(command.c_str());
 
@@ -165,7 +207,7 @@ int main()
 
     std::cout << "Compilation successful. Running code ..." << std::endl;
 
-    string output_command = "./" + file_path + ".out";
+    string output_command = "./" + file_path + ".out \"" + challenge_input + "\"";
 
     system(output_command.c_str());
   }
@@ -173,39 +215,4 @@ int main()
   {
     cerr << "Error: " << ex.what() << endl;
   }
-
-  // cout << "Choose a year: ";
-
-  // cout << "Which part would you like to choose? (1/2): ";
-  // int part;
-  // cin >> part;
-
-  // cout << "Would you like to manually enter directions or read from a file? (m/f): ";
-  // string choice;
-  // cin >> choice;
-
-  // if (choice == "f")
-  // {
-  //   ifstream file("part1.txt");
-  //   if (file.is_open())
-  //   {
-  //     getline(file, directions);
-  //     file.close();
-  //   }
-  //   else
-  //   {
-  //     cout << "Unable to open file" << endl;
-  //     return 0;
-  //   }
-  // }
-  // else if (choice == "m")
-  // {
-  //   cout << "Enter directions that elf gives santa: ";
-  //   cin >> directions;
-  // }
-  // else
-  // {
-  //   cout << "Invalid choice" << endl;
-  //   return 0;
-  // }
 }
