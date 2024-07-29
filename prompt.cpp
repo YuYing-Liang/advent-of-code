@@ -114,8 +114,8 @@ int main()
 
     string chosen_year;
     cin >> chosen_year;
-    auto index = find(year_folders.begin(), year_folders.end(), chosen_year);
-    if (index == year_folders.end())
+    auto year_folder_index = find(year_folders.begin(), year_folders.end(), chosen_year);
+    if (year_folder_index == year_folders.end())
     {
       cout << "Chosen year does not exist in the current codebase." << endl;
       return 0;
@@ -133,8 +133,8 @@ int main()
     }
     auto year_folder_value = year_folder_result.value();
     vector<string> day_folders = year_folder_value.first;
-    auto index = find(day_folders.begin(), day_folders.end(), chosen_year);
-    if (index == day_folders.end())
+    auto day_folder_index = find(day_folders.begin(), day_folders.end(), chosen_year);
+    if (day_folder_index == day_folders.end())
     {
       cout << "Chosen year does not exist in the current codebase." << endl;
       return 0;
