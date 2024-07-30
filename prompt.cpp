@@ -160,7 +160,9 @@ int main()
       return 0;
     }
 
-    string file_path = chosen_year + "/" + chosen_day + "/" + "part" + to_string(chosen_part);
+    string file_dir = chosen_year + "/" + chosen_day + "/";
+    string file_path = file_dir + "part" + to_string(chosen_part);
+    string input_file_path = file_dir + "input.txt";
 
     cout << "Would you like to use the input file or manually enter data? (m/f):" << endl;
     char input_choice;
@@ -169,10 +171,18 @@ int main()
     string challenge_input;
     if (input_choice == 'f')
     {
-      ifstream file(current_path.string() + "/" + file_path + ".txt");
+      ifstream file(current_path.string() + "/" + input_file_path);
       if (file.is_open())
       {
-        getline(file, challenge_input);
+        string line;
+        while (getline(file, line))
+        {
+          challenge_input += line + "\n";
+        }
+        if (!challenge_input.empty())
+        {
+          challenge_input.pop_back();
+        }
         file.close();
       }
       else
@@ -199,16 +209,14 @@ int main()
     cout << "Running: " + command << endl;
 
     int compilation_result = system(command.c_str());
-
     if (compilation_result != 0)
     {
       std::cout << "Compilation failed." << std::endl;
     }
 
-    std::cout << "Compilation successful. Running code ..." << std::endl;
+    std::cout << "Compilation successful. \n\nRunning Year " + chosen_year + " " + chosen_day + " Part " + to_string(chosen_part) << std::endl;
 
     string output_command = "./" + file_path + ".out \"" + challenge_input + "\"";
-
     system(output_command.c_str());
   }
   catch (const exception &ex)

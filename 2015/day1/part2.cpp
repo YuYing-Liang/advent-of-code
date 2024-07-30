@@ -1,6 +1,9 @@
 #include <iostream>
 using namespace std;
 
+/**
+ * Note: assuming Santa will always end up in the basement
+ */
 int main(int argc, char *argv[])
 {
   if (argc < 2)
@@ -12,6 +15,7 @@ int main(int argc, char *argv[])
   string input = argv[1];
 
   int resulting_floor = 0;
+  int position;
 
   for (int i = 0; i < input.length(); i++)
   {
@@ -24,9 +28,14 @@ int main(int argc, char *argv[])
     {
       resulting_floor -= 1;
     }
+    if (resulting_floor == -1)
+    {
+      position = i + 1;
+      break;
+    }
   }
 
-  cout << "Santa ends up on: " + to_string(resulting_floor) << endl;
+  cout << "Santa goes into the basement at position: " + to_string(position) << endl;
 
   return 0;
 }
