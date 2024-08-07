@@ -3,21 +3,9 @@
 #include <sstream>
 #include <string>
 
+#include "../../utilities/stringUtils.h";
+
 using namespace std;
-
-vector<string> split(const string &s, char delimiter)
-{
-  vector<string> substrings;
-  string substring;
-  istringstream inputStream(s);
-
-  while (getline(inputStream, substring, delimiter))
-  {
-    substrings.push_back(substring);
-  }
-
-  return substrings;
-}
 
 int main(int argc, char *argv[])
 {

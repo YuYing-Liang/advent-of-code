@@ -3,6 +3,8 @@
 #include <set>
 #include <regex>
 
+#include "../../utilities/stringUtils.h";
+
 using namespace std;
 
 bool is_nice_string(string input)
@@ -11,20 +13,6 @@ bool is_nice_string(string input)
   regex pairOfLettersWithOneBetween("([a-zA-Z]).\\1");
 
   return regex_search(input, pairOfRepeatingLetters) && regex_search(input, pairOfLettersWithOneBetween);
-}
-
-vector<string> split(const string &s, char delimiter)
-{
-  vector<string> substrings;
-  string substring;
-  istringstream inputStream(s);
-
-  while (getline(inputStream, substring, delimiter))
-  {
-    substrings.push_back(substring);
-  }
-
-  return substrings;
 }
 
 int main(int argc, char *argv[])

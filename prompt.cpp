@@ -193,8 +193,9 @@ int main()
     }
     else if (input_choice == 'm')
     {
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
       cout << "Enter the input for this challenge: ";
-      cin >> challenge_input;
+      getline(cin, challenge_input);
     }
     else
     {
@@ -204,7 +205,7 @@ int main()
 
     cout << "Great! Compiling code ..." << endl;
 
-    string command = "g++ -std=c++17 -o " + file_path + ".out " + file_path + ".cpp";
+    string command = "g++ -std=c++17 -o " + file_path + ".out " + file_path + ".cpp utilities/stringUtils.cpp";
 
     cout << "Running: " + command << endl;
 
