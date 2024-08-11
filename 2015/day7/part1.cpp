@@ -1,11 +1,37 @@
 #include <iostream>
 #include <map>
 #include <regex>
+#include <optional>
 
 #include "../../utilities/stringUtils.h"
 
 using namespace std;
 
+enum Command
+{
+  MOVE,
+  NOT,
+  AND,
+  RSHIFT,
+  LSHIFT
+};
+
+struct wire
+{
+  optional<uint16_t> value;
+  optional<string> input1;
+  optional<string> input2;
+  optional<int> value2;
+  Command command;
+};
+
+/**
+ * Solution:
+ * 1. create graph of all wires and signals
+ * 2. store event but don't calculate
+ * 3. when an input or all inputs have a signal,
+ *    work backwards to calculate propagating signal
+ */
 int main(int argc, char *argv[])
 {
   if (argc < 2)
@@ -17,7 +43,7 @@ int main(int argc, char *argv[])
   string input = argv[1];
 
   vector<string> instructions = split(input, '\n');
-  map<string, uint16_t> wires;
+  map<string, wire> wires;
   regex integerPattern("^-?\\d+$");
 
   for (int i = 0; i < instructions.size(); i++)
@@ -31,12 +57,14 @@ int main(int argc, char *argv[])
       const string data = sub_steps[0];
       if (regex_match(data, integerPattern))
       {
-        wires[destination_wire] = static_cast<uint16_t>(stoul(data));
-        continue;
+        // data becomes
+        // wires[destination_wire] = static_cast<uint16_t>(stoul(data));
+        // continue;
       }
-      if (wires.find(data) != wires.end())
+      // wire has no signal
+      if (wires.find(data) == wires.end())
       {
-        wires[destination_wire] = wires[data];
+        wires[destination_wire] = {nullopt, data, nullopt, nullopt, Command::MOVE};
       }
       continue;
     }
@@ -45,14 +73,9 @@ int main(int argc, char *argv[])
     if (sub_steps.size() == 4 && sub_steps[0].compare("NOT") == 0)
     {
       const string data = sub_steps[1];
-      if (regex_match(data, integerPattern))
-      {
-        wires[destination_wire] = ~static_cast<uint16_t>(stoul(data));
-        continue;
-      }
       if (wires.find(data) != wires.end())
       {
-        wires[destination_wire] = ~wires[data];
+        wires[destination_wire] = {nullopt, data, nullopt, nullopt, Command::NOT};
       }
       continue;
     }
@@ -62,13 +85,18 @@ int main(int argc, char *argv[])
     const string data2 = sub_steps[2];
     const string operation = sub_steps[1];
 
+    wire wireData;
     if (wires.find(data1) == wires.end())
-      continue;
+    {
+      wireData.input1 = data1;
+    }
 
     if (operation.compare("AND") == 0)
     {
       if (wires.find(data2) == wires.end())
-        continue;
+      {
+        wireData.input2 = data2;
+      }
       wires[destination_wire] = wires[data1] & wires[data2];
       continue;
     }
@@ -76,7 +104,9 @@ int main(int argc, char *argv[])
     if (operation.compare("OR") == 0)
     {
       if (wires.find(data2) == wires.end())
-        continue;
+      {
+        wireData.input2 = data2;
+      }
       wires[destination_wire] = wires[data1] | wires[data2];
       continue;
     }
