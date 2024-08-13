@@ -2,6 +2,9 @@
 #include <map>
 #include <cmath>
 #include <algorithm>
+#include <set>
+#include <limits>
+#include <optional>
 
 #include "../../utilities/stringUtils.h"
 
@@ -13,10 +16,90 @@ struct city_distance
   int distance;
 };
 
+// assuming all nodes in graph start as unvisitedy
+optional<int> cost_of_path(map<string, vector<city_distance>> &graph, set<string> _visited_cities, string current_city, int cost)
+{
+  int min_cost = numeric_limits<int>::max();
+
+  // explicitly copying set
+  set<string> visited_cities(_visited_cities);
+  visited_cities.insert(current_city);
+
+  // logging
+  cout << "Current City: " << current_city << endl;
+  cout << "Cost: " << to_string(cost) << endl;
+  cout << "Visited Cities: ";
+  for (auto city : visited_cities)
+  {
+    cout << city + ", ";
+  }
+  cout << "\n\n";
+
+  bool visits_any_children = false;
+  for (auto adjacent_city : graph[current_city])
+  {
+    cout << "Parent: " << current_city << " | Adjacent City: " << adjacent_city.city << endl;
+    if (visited_cities.count(adjacent_city.city) == 0)
+    {
+      cout << "- city not visited, distance: " + to_string(adjacent_city.distance) << endl;
+      optional<int> sub_path_cost = cost_of_path(
+          graph,
+          visited_cities,
+          adjacent_city.city,
+          cost + adjacent_city.distance);
+      if (sub_path_cost.has_value())
+      {
+        min_cost = min(min_cost, sub_path_cost.value());
+      }
+      visits_any_children = true;
+      cout << "Parent: " << current_city << " Min cost now: " << to_string(min_cost) << endl;
+    }
+    else
+    {
+      cout << "- city visited" << endl;
+    }
+  }
+  // no unvisited adjacent cities
+  // check if all nodes in graph have been visited
+  if (!visits_any_children)
+  {
+    for (auto nodes : graph)
+    {
+      // if unvisited node exists, return to parent node
+      // and calculate a new path with other child nodes
+      if (visited_cities.count(nodes.first) == 0)
+      {
+        cout << "not all cities visited" << endl;
+        return nullopt;
+      }
+    }
+    cout << "last city, all visited" << endl;
+    return cost;
+  }
+  cout << "all cities visisted" << endl;
+
+  if (min_cost == numeric_limits<int>::max())
+  {
+    cout << "could not find complete cycle" << endl;
+    return nullopt;
+  }
+
+  cout << "Current City: " << current_city << " return cost: " << to_string(min_cost) << "\n"
+       << endl;
+  return min_cost;
+}
+
 /**
+ * Problem: Travelling Salesman
+ * - find the shortest path to all nodes in
+ *   an undirected, weighted graph, visiting
+ *   all nodes only ONCE
+ * - minimum weighted Hamiltonian Cycle
+ * - does not need to end at the start node
  * Solution:
- * 1. create graph of all the paths and cities
- * 2. perform Djikstra's to find the shortest path
+ * - DFS for every single path
+ * - keep track of minimum cost
+ * - if cannot find a path, return
  */
 int main(int argc, char *argv[])
 {
@@ -29,6 +112,7 @@ int main(int argc, char *argv[])
   string input = argv[1];
   vector<string> distance_str = split(input, '\n');
   map<string, vector<city_distance>> graph;
+  string first_city; // decide to start at first city in list (arbitrary)
 
   for (const string distance : distance_str)
   {
@@ -49,32 +133,33 @@ int main(int argc, char *argv[])
     graph[destination_city].push_back({origin_city, dist});
   }
 
-  const int size = graph.size();
-  vector<int> closest_distances;
-  for (const auto &pair : graph)
+  cout << "Constructed graph: " << endl;
+  for (auto [city, city_data] : graph)
   {
-    map<string, int> local_graph;
-    local_graph[pair.first] = 0;
-
-    int shortest_distance = INFINITY;
-    string closest_city;
-    for (const city_distance city_data : pair.second)
+    for (auto adj_city : city_data)
     {
-      const string city = city_data.city;
-      const int dist = city_data.distance;
-      if (local_graph.find(city_data.city) == local_graph.end() || local_graph[city] > dist)
-      {
-        local_graph[city] = dist;
-      }
-      if (dist < shortest_distance)
-      {
-        shortest_distance = dist;
-        closest_city = city;
-      }
+      cout << city + " - " + adj_city.city + ": " + to_string(adj_city.distance) << endl;
+    }
+  }
+  cout << "\n";
+
+  int shortest_path = numeric_limits<int>::max();
+  for (auto [city, city_data] : graph)
+  {
+    cout << "------------" << city << "------------" << endl;
+    optional<int> shortest_path_from_city = cost_of_path(graph, {}, city, 0);
+    if (shortest_path_from_city.has_value())
+    {
+      shortest_path = min(shortest_path, shortest_path_from_city.value());
+      cout << "Shortest path found from starting at city " << city << ": " << to_string(shortest_path_from_city.value()) << endl;
+    }
+    else
+    {
+      cout << "This starting city has no cycle path: " << city << endl;
     }
   }
 
-  // cout << "The shortest distance is: " + to_string(signals["a"]) << endl;
+  cout << "The shortest distance is: " + to_string(shortest_path) << endl;
 
   return 0;
 }
