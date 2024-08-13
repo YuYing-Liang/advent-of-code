@@ -93,11 +93,9 @@ optional<int> cost_of_path(map<string, vector<city_distance>> &graph, set<string
  * - find the longest path to all nodes in
  *   an undirected, weighted graph, visiting
  *   all nodes only ONCE
- * - minimum weighted Hamiltonian Cycle
  * - does not need to end at the start node
  * Solution:
  * - DFS for every single path
- * - keep track of minimum cost
  * - if cannot find a path, return
  */
 int main(int argc, char *argv[])
