@@ -130,7 +130,7 @@ int main()
 
     string chosen_day;
     cin >> chosen_day;
-    chosen_day = "day" + chosen_day;
+    chosen_day = "day " + chosen_day;
 
     fs::path day_folder_path(current_path.string());
     day_folder_path /= chosen_year;
