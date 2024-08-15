@@ -205,7 +205,7 @@ int main()
 
     cout << "Great! Compiling code ..." << endl;
 
-    string command = "g++ -std=c++17 -o " + file_path + ".out " + file_path + ".cpp utilities/stringUtils.cpp";
+    string command = "g++ -std=c++17 -o \"" + file_path + ".out\" \"" + file_path + ".cpp\" utilities/stringUtils.cpp";
 
     cout << "Running: " + command << endl;
 
@@ -217,7 +217,7 @@ int main()
 
     std::cout << "Compilation successful. \n\nRunning Year " + chosen_year + " " + chosen_day + " Part " + to_string(chosen_part) << std::endl;
 
-    string output_command = "./" + file_path + ".out \"" + challenge_input + "\"";
+    string output_command = "\"./" + file_path + ".out\" \"" + challenge_input + "\"";
     system(output_command.c_str());
   }
   catch (const exception &ex)
